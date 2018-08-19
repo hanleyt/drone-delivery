@@ -1,0 +1,2 @@
+include ':android-controller'
+project(':android-controller').projectDir = new File('android-controller/')
