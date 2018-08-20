@@ -1,9 +1,9 @@
-# Android Controller
+# Android Test App
 
-This is an android module that interacts with the Parrot SDK and contains samples from their github samples repo.
+This is an android application that can be used to test our modules through an Android UI.
 
 https://github.com/Parrot-Developers/Samples/tree/master/Android/SDKSample/
 
 It contains a sample app that can discover multiple types of drones, connect to them, and fly them.
 
-It can communicate with our mambo drone over bluetooth via the MiniDrone class and the MiniDroneActivity.
+The MiniDroneActivity uses the android-controller library to communicate with the drone.
