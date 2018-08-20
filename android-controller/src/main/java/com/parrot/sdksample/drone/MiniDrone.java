@@ -32,11 +32,12 @@ import com.parrot.arsdk.arutils.ARUTILS_DESTINATION_ENUM;
 import com.parrot.arsdk.arutils.ARUTILS_FTP_TYPE_ENUM;
 import com.parrot.arsdk.arutils.ARUtilsException;
 import com.parrot.arsdk.arutils.ARUtilsManager;
+import com.toasttab.drone.Drone;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MiniDrone {
+public class MiniDrone implements Drone {
     private static final String TAG = "MiniDrone";
 
     public interface Listener {
@@ -215,12 +216,14 @@ public class MiniDrone {
         return mFlyingState;
     }
 
+    @Override
     public void takeOff() {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureMiniDrone().sendPilotingTakeOff();
         }
     }
 
+    @Override
     public void land() {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureMiniDrone().sendPilotingLanding();
@@ -249,6 +252,7 @@ public class MiniDrone {
      * Note that {@link MiniDrone#setFlag(byte)} should be set to 1 in order to take in account the pitch value
      * @param pitch value in percentage from -100 to 100
      */
+    @Override
     public void setPitch(byte pitch) {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureMiniDrone().setPilotingPCMDPitch(pitch);
@@ -260,18 +264,21 @@ public class MiniDrone {
      * Note that {@link MiniDrone#setFlag(byte)} should be set to 1 in order to take in account the roll value
      * @param roll value in percentage from -100 to 100
      */
+    @Override
     public void setRoll(byte roll) {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureMiniDrone().setPilotingPCMDRoll(roll);
         }
     }
 
+    @Override
     public void setYaw(byte yaw) {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureMiniDrone().setPilotingPCMDYaw(yaw);
         }
     }
 
+    @Override
     public void setGaz(byte gaz) {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureMiniDrone().setPilotingPCMDGaz(gaz);
@@ -282,6 +289,7 @@ public class MiniDrone {
      * Take in account or not the pitch and roll values
      * @param flag 1 if the pitch and roll values should be used, 0 otherwise
      */
+    @Override
     public void setFlag(byte flag) {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureMiniDrone().setPilotingPCMDFlag(flag);
