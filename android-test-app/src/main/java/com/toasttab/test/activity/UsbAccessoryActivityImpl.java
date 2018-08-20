@@ -1,4 +1,4 @@
-package com.parrot.sdksample.activity;
+package com.toasttab.test.activity;
 
 import com.parrot.arsdk.ardiscovery.UsbAccessoryActivity;
 

@@ -1,4 +1,4 @@
-package com.parrot.sdksample.activity;
+package com.toasttab.test.activity;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -16,9 +16,9 @@ import com.parrot.arsdk.arcontroller.ARCONTROLLER_DEVICE_STATE_ENUM;
 import com.parrot.arsdk.arcontroller.ARControllerCodec;
 import com.parrot.arsdk.arcontroller.ARFrame;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
-import com.parrot.sdksample.R;
 import com.parrot.sdksample.drone.SkyController2Drone;
-import com.parrot.sdksample.view.H264VideoView;
+import com.toasttab.test.R;
+import com.toasttab.test.view.H264VideoView;
 
 public class SkyController2Activity extends AppCompatActivity {
     private static final String TAG = "SkyController2Activity";

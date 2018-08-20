@@ -1,4 +1,4 @@
-package com.parrot.sdksample.view;
+package com.toasttab.test.view;
 
 import android.content.Context;
 import android.media.MediaCodec;

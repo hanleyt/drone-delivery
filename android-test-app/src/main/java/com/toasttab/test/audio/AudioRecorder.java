@@ -1,4 +1,4 @@
-package com.parrot.sdksample.audio;
+package com.toasttab.test.audio;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;

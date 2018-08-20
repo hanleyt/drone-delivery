@@ -1,11 +1,9 @@
-package com.parrot.sdksample.audio;
+package com.toasttab.test.audio;
 
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.util.Log;
 
-import com.parrot.arsdk.arcontroller.ARAudioFrame;
 import com.parrot.arsdk.arsal.ARNativeData;
 
 public class AudioPlayer

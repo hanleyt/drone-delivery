@@ -1,2 +1,2 @@
-include ':android-controller', ':drone-controller', ':food-service', ':consumer-service', ':delivery-service', ':merchant-web-app'
+include ':android-test-app', ':android-controller', ':drone-controller', ':food-service', ':consumer-service', ':delivery-service', ':merchant-web-app'
 project(':android-controller').projectDir = new File('android-controller/')

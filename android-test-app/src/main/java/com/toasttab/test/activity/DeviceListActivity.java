@@ -1,4 +1,4 @@
-package com.parrot.sdksample.activity;
+package com.toasttab.test.activity;
 
 import android.Manifest;
 import android.content.Intent;
@@ -22,8 +22,8 @@ import com.parrot.arsdk.ARSDK;
 import com.parrot.arsdk.ardiscovery.ARDISCOVERY_PRODUCT_ENUM;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryService;
-import com.parrot.sdksample.R;
 import com.parrot.sdksample.discovery.DroneDiscoverer;
+import com.toasttab.test.R;
 
 import java.util.ArrayList;
 import java.util.HashSet;

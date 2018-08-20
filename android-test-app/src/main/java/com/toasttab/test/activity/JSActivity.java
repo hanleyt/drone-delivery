@@ -1,4 +1,4 @@
-package com.parrot.sdksample.activity;
+package com.toasttab.test.activity;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -16,14 +16,13 @@ import com.parrot.arsdk.arcontroller.ARCONTROLLER_DEVICE_STATE_ENUM;
 import com.parrot.arsdk.arcontroller.ARCONTROLLER_STREAM_CODEC_TYPE_ENUM;
 import com.parrot.arsdk.arcontroller.ARControllerCodec;
 import com.parrot.arsdk.arcontroller.ARFrame;
-import com.parrot.arsdk.ardiscovery.ARDISCOVERY_PRODUCT_ENUM;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 import com.parrot.arsdk.arsal.ARNativeData;
-import com.parrot.sdksample.R;
-import com.parrot.sdksample.audio.AudioPlayer;
-import com.parrot.sdksample.audio.AudioRecorder;
+import com.toasttab.test.R;
+import com.toasttab.test.audio.AudioPlayer;
+import com.toasttab.test.audio.AudioRecorder;
 import com.parrot.sdksample.drone.JSDrone;
-import com.parrot.sdksample.view.JSVideoView;
+import com.toasttab.test.view.JSVideoView;
 
 public class JSActivity extends AppCompatActivity {
     private static final String TAG = "JSActivity";
