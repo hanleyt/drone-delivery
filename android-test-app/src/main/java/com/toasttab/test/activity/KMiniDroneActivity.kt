@@ -6,8 +6,6 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.MotionEvent
-import android.widget.Button
-import android.widget.TextView
 import com.parrot.arsdk.arcommands.ARCOMMANDS_MINIDRONE_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM
 import com.parrot.arsdk.arcommands.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM
 import com.parrot.arsdk.arcontroller.ARCONTROLLER_DEVICE_STATE_ENUM
@@ -16,7 +14,7 @@ import com.parrot.arsdk.arcontroller.ARFrame
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService
 import com.parrot.sdksample.drone.MiniDrone
 import com.toasttab.test.R
-import com.toasttab.test.view.H264VideoView
+import kotlinx.android.synthetic.main.activity_minidrone.*
 import timber.log.Timber
 
 
@@ -26,12 +24,6 @@ class KMiniDroneActivity : AppCompatActivity() {
     var mMiniDrone: MiniDrone? = null
     lateinit var mConnectionProgressDialog: ProgressDialog
     lateinit var mDownloadProgressDialog: ProgressDialog
-
-    lateinit var mVideoView: H264VideoView
-    lateinit var mBatteryLabel: TextView
-
-    lateinit var mTakeOffLandBt: Button
-    lateinit var mDownloadBt: Button
 
     var mNbMaxDownload = 0
     var mCurrentDownloadIndex = 0
@@ -100,34 +92,38 @@ class KMiniDroneActivity : AppCompatActivity() {
 
     private fun initIHM() {
         Timber.d("initHM...")
-        mVideoView = findViewById(R.id.videoView) as H264VideoView
 
         findViewById(R.id.emergencyBt).setOnClickListener { mMiniDrone?.emergency() }
 
-        mTakeOffLandBt = findViewById(R.id.takeOffOrLandBt) as Button
-        mTakeOffLandBt.setOnClickListener {
+        takeOffOrLandBt.setOnClickListener {
             when (mMiniDrone?.flyingState) {
                 ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED -> mMiniDrone?.takeOff()
                 ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING, ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING -> mMiniDrone?.land()
+                else -> Timber.d("MiniDrone flying state not handled: ${mMiniDrone?.flyingState}")
             }
         }
 
         findViewById(R.id.takePictureBt).setOnClickListener { mMiniDrone?.takePicture() }
 
-        mDownloadBt = findViewById(R.id.downloadBt) as Button
-        mDownloadBt.isEnabled = false
-        mDownloadBt.setOnClickListener {
-            mMiniDrone?.getLastFlightMedias()
+        with(downloadBt) {
+            isEnabled = true
+            setOnClickListener {
+                mMiniDrone?.getLastFlightMedias()
 
-            mDownloadProgressDialog = ProgressDialog(this@KMiniDroneActivity, R.style.AppCompatAlertDialogStyle)
-            mDownloadProgressDialog.isIndeterminate = true
-            mDownloadProgressDialog.setMessage("Fetching medias")
-            mDownloadProgressDialog.setCancelable(false)
-            mDownloadProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel") { dialog, which -> mMiniDrone?.cancelGetLastFlightMedias() }
-            mDownloadProgressDialog.show()
+                mDownloadProgressDialog = ProgressDialog(this@KMiniDroneActivity, R.style.AppCompatAlertDialogStyle)
+                with(mDownloadProgressDialog) {
+                    isIndeterminate = true
+                    setMessage("Fetching medias")
+                    setCancelable(false)
+                    setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel") { dialog, which -> mMiniDrone?.cancelGetLastFlightMedias() }
+                    show()
+                }
+            }
         }
 
-        findViewById(R.id.gazUpBt).setOnTouchListener { v, event ->
+
+        // Up action
+        gazUpBt.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
@@ -138,15 +134,12 @@ class KMiniDroneActivity : AppCompatActivity() {
                     v.isPressed = false
                     mMiniDrone?.setGaz(0.toByte())
                 }
-
-                else -> {
-                }
             }
-
             true
         }
 
-        findViewById(R.id.gazDownBt).setOnTouchListener { v, event ->
+        // Down action
+        gazDownBt.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
@@ -157,15 +150,12 @@ class KMiniDroneActivity : AppCompatActivity() {
                     v.isPressed = false
                     mMiniDrone?.setGaz(0.toByte())
                 }
-
-                else -> {
-                }
             }
-
             true
         }
 
-        findViewById(R.id.yawLeftBt).setOnTouchListener { v, event ->
+        // Yaw left action
+        yawLeftBt.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
@@ -176,15 +166,12 @@ class KMiniDroneActivity : AppCompatActivity() {
                     v.isPressed = false
                     mMiniDrone?.setYaw(0.toByte())
                 }
-
-                else -> {
-                }
             }
-
             true
         }
 
-        findViewById(R.id.yawRightBt).setOnTouchListener { v, event ->
+        // Yaw right action
+        yawRightBt.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
@@ -195,15 +182,12 @@ class KMiniDroneActivity : AppCompatActivity() {
                     v.isPressed = false
                     mMiniDrone?.setYaw(0.toByte())
                 }
-
-                else -> {
-                }
             }
-
             true
         }
 
-        findViewById(R.id.forwardBt).setOnTouchListener { v, event ->
+        // Forward action
+        forwardBt.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
@@ -216,15 +200,11 @@ class KMiniDroneActivity : AppCompatActivity() {
                     mMiniDrone?.setPitch(0.toByte())
                     mMiniDrone?.setFlag(0.toByte())
                 }
-
-                else -> {
-                }
             }
-
             true
         }
 
-        findViewById(R.id.backBt).setOnTouchListener { v, event ->
+        backBt.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
@@ -237,15 +217,11 @@ class KMiniDroneActivity : AppCompatActivity() {
                     mMiniDrone?.setPitch(0.toByte())
                     mMiniDrone?.setFlag(0.toByte())
                 }
-
-                else -> {
-                }
             }
-
             true
         }
 
-        findViewById(R.id.rollLeftBt).setOnTouchListener { v, event ->
+        rollLeftBt.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
@@ -258,15 +234,11 @@ class KMiniDroneActivity : AppCompatActivity() {
                     mMiniDrone?.setRoll(0.toByte())
                     mMiniDrone?.setFlag(0.toByte())
                 }
-
-                else -> {
-                }
             }
-
             true
         }
 
-        findViewById(R.id.rollRightBt).setOnTouchListener { v, event ->
+        rollRightBt.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
@@ -279,15 +251,9 @@ class KMiniDroneActivity : AppCompatActivity() {
                     mMiniDrone?.setRoll(0.toByte())
                     mMiniDrone?.setFlag(0.toByte())
                 }
-
-                else -> {
-                }
             }
-
             true
         }
-
-        mBatteryLabel = findViewById(R.id.batteryLabel) as TextView
     }
 
 
@@ -307,24 +273,24 @@ class KMiniDroneActivity : AppCompatActivity() {
         }
 
         override fun onBatteryChargeChanged(batteryPercentage: Int) {
-            mBatteryLabel.text = String.format("%d%%", batteryPercentage)
+            batteryLabel.text = String.format("%d%%", batteryPercentage)
         }
 
         override fun onPilotingStateChanged(state: ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM) {
             when (state) {
                 ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED -> {
-                    mTakeOffLandBt.text = "Take off"
-                    mTakeOffLandBt.isEnabled = true
-                    mDownloadBt.isEnabled = true
+                    takeOffOrLandBt.text = "Take off"
+                    takeOffOrLandBt.isEnabled = true
+                    downloadBt.isEnabled = true
                 }
                 ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING, ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING -> {
-                    mTakeOffLandBt.text = "Land"
-                    mTakeOffLandBt.isEnabled = true
-                    mDownloadBt.isEnabled = false
+                    takeOffOrLandBt.text = "Land"
+                    takeOffOrLandBt.isEnabled = true
+                    downloadBt.isEnabled = false
                 }
                 else -> {
-                    mTakeOffLandBt.isEnabled = false
-                    mDownloadBt.isEnabled = false
+                    takeOffOrLandBt.isEnabled = false
+                    downloadBt.isEnabled = false
                 }
             }
         }
@@ -334,11 +300,11 @@ class KMiniDroneActivity : AppCompatActivity() {
         }
 
         override fun configureDecoder(codec: ARControllerCodec) {
-            mVideoView.configureDecoder(codec)
+            videoView.configureDecoder(codec)
         }
 
         override fun onFrameReceived(frame: ARFrame) {
-            mVideoView.displayFrame(frame)
+            videoView.displayFrame(frame)
         }
 
         override fun onMatchingMediasFound(nbMedias: Int) {
