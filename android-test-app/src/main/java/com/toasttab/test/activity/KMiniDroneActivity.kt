@@ -19,10 +19,11 @@ import com.toasttab.test.R
 import com.toasttab.test.view.H264VideoView
 import timber.log.Timber
 
+
 class KMiniDroneActivity : AppCompatActivity() {
     val TAG = javaClass.name
 
-    lateinit var mMiniDrone: MiniDrone
+    var mMiniDrone: MiniDrone? = null
     lateinit var mConnectionProgressDialog: ProgressDialog
     lateinit var mDownloadProgressDialog: ProgressDialog
 
@@ -49,14 +50,18 @@ class KMiniDroneActivity : AppCompatActivity() {
         // TODO Conor: passing in new service just to prevent NPE, use intent-provided service when ready.
         // mMiniDrone = MiniDrone(this, service)
         mMiniDrone = MiniDrone(this, ARDiscoveryDeviceService())
-        mMiniDrone.addListener(mMiniDroneListener)
+        mMiniDrone?.addListener(mMiniDroneListener) ?: Timber.d("Drone not initialised")
     }
 
     override fun onStart() {
         super.onStart()
 
+        if (mMiniDrone == null) {
+            return
+        }
+
         // show a loading view while the minidrone is connecting
-        if (ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING != mMiniDrone.connectionState) {
+        if (ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING != mMiniDrone?.connectionState) {
             mConnectionProgressDialog = ProgressDialog(this, R.style.AppCompatAlertDialogStyle)
             with(mConnectionProgressDialog) {
                 isIndeterminate = true
@@ -64,36 +69,31 @@ class KMiniDroneActivity : AppCompatActivity() {
                 setCancelable(false)
                 // TODO Conor: dialog temporarily not shown as it causes View to leak.
                 // WindowManager: android.view.WindowLeaked
-                // show()
+//                 show()
             }
 
             // if the connection to the MiniDrone fails, finish the activity
-            if (!mMiniDrone.connect()) {
-                finish()
+            if (!mMiniDrone!!.connect() ) {
+                // finish() todo uncomment when working with real drone.
             }
         }
     }
 
     override fun onBackPressed() {
-        if (mMiniDrone != null) {
-            mConnectionProgressDialog = ProgressDialog(this, R.style.AppCompatAlertDialogStyle)
-            with(mConnectionProgressDialog) {
-                isIndeterminate = true
-                setMessage("Disconnecting ...")
-                setCancelable(false)
-                show()
-            }
-
-            if (!mMiniDrone.disconnect()) {
-                finish()
-            }
-        } else {
+        if (mMiniDrone == null || !mMiniDrone!!.disconnect())
             finish()
+
+        mConnectionProgressDialog = ProgressDialog(this, R.style.AppCompatAlertDialogStyle)
+        with(mConnectionProgressDialog) {
+            isIndeterminate = true
+            setMessage("Disconnecting ...")
+            setCancelable(false)
+            show()
         }
     }
 
     public override fun onDestroy() {
-        mMiniDrone.dispose()
+        mMiniDrone?.dispose()
         super.onDestroy()
     }
 
@@ -102,28 +102,28 @@ class KMiniDroneActivity : AppCompatActivity() {
         Timber.d("initHM...")
         mVideoView = findViewById(R.id.videoView) as H264VideoView
 
-        findViewById(R.id.emergencyBt).setOnClickListener { mMiniDrone.emergency() }
+        findViewById(R.id.emergencyBt).setOnClickListener { mMiniDrone?.emergency() }
 
         mTakeOffLandBt = findViewById(R.id.takeOffOrLandBt) as Button
         mTakeOffLandBt.setOnClickListener {
-            when (mMiniDrone.flyingState) {
-                ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED -> mMiniDrone.takeOff()
-                ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING, ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING -> mMiniDrone.land()
+            when (mMiniDrone?.flyingState) {
+                ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED -> mMiniDrone?.takeOff()
+                ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING, ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING -> mMiniDrone?.land()
             }
         }
 
-        findViewById(R.id.takePictureBt).setOnClickListener { mMiniDrone.takePicture() }
+        findViewById(R.id.takePictureBt).setOnClickListener { mMiniDrone?.takePicture() }
 
         mDownloadBt = findViewById(R.id.downloadBt) as Button
         mDownloadBt.isEnabled = false
         mDownloadBt.setOnClickListener {
-            mMiniDrone.getLastFlightMedias()
+            mMiniDrone?.getLastFlightMedias()
 
             mDownloadProgressDialog = ProgressDialog(this@KMiniDroneActivity, R.style.AppCompatAlertDialogStyle)
             mDownloadProgressDialog.isIndeterminate = true
             mDownloadProgressDialog.setMessage("Fetching medias")
             mDownloadProgressDialog.setCancelable(false)
-            mDownloadProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel") { dialog, which -> mMiniDrone.cancelGetLastFlightMedias() }
+            mDownloadProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel") { dialog, which -> mMiniDrone?.cancelGetLastFlightMedias() }
             mDownloadProgressDialog.show()
         }
 
@@ -131,12 +131,12 @@ class KMiniDroneActivity : AppCompatActivity() {
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
-                    mMiniDrone.setGaz(50.toByte())
+                    mMiniDrone?.setGaz(50.toByte())
                 }
 
                 MotionEvent.ACTION_UP -> {
                     v.isPressed = false
-                    mMiniDrone.setGaz(0.toByte())
+                    mMiniDrone?.setGaz(0.toByte())
                 }
 
                 else -> {
@@ -150,12 +150,12 @@ class KMiniDroneActivity : AppCompatActivity() {
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
-                    mMiniDrone.setGaz((-50).toByte())
+                    mMiniDrone?.setGaz((-50).toByte())
                 }
 
                 MotionEvent.ACTION_UP -> {
                     v.isPressed = false
-                    mMiniDrone.setGaz(0.toByte())
+                    mMiniDrone?.setGaz(0.toByte())
                 }
 
                 else -> {
@@ -169,12 +169,12 @@ class KMiniDroneActivity : AppCompatActivity() {
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
-                    mMiniDrone.setYaw((-50).toByte())
+                    mMiniDrone?.setYaw((-50).toByte())
                 }
 
                 MotionEvent.ACTION_UP -> {
                     v.isPressed = false
-                    mMiniDrone.setYaw(0.toByte())
+                    mMiniDrone?.setYaw(0.toByte())
                 }
 
                 else -> {
@@ -188,12 +188,12 @@ class KMiniDroneActivity : AppCompatActivity() {
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
-                    mMiniDrone.setYaw(50.toByte())
+                    mMiniDrone?.setYaw(50.toByte())
                 }
 
                 MotionEvent.ACTION_UP -> {
                     v.isPressed = false
-                    mMiniDrone.setYaw(0.toByte())
+                    mMiniDrone?.setYaw(0.toByte())
                 }
 
                 else -> {
@@ -207,14 +207,14 @@ class KMiniDroneActivity : AppCompatActivity() {
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
-                    mMiniDrone.setPitch(50.toByte())
-                    mMiniDrone.setFlag(1.toByte())
+                    mMiniDrone?.setPitch(50.toByte())
+                    mMiniDrone?.setFlag(1.toByte())
                 }
 
                 MotionEvent.ACTION_UP -> {
                     v.isPressed = false
-                    mMiniDrone.setPitch(0.toByte())
-                    mMiniDrone.setFlag(0.toByte())
+                    mMiniDrone?.setPitch(0.toByte())
+                    mMiniDrone?.setFlag(0.toByte())
                 }
 
                 else -> {
@@ -228,14 +228,14 @@ class KMiniDroneActivity : AppCompatActivity() {
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
-                    mMiniDrone.setPitch((-50).toByte())
-                    mMiniDrone.setFlag(1.toByte())
+                    mMiniDrone?.setPitch((-50).toByte())
+                    mMiniDrone?.setFlag(1.toByte())
                 }
 
                 MotionEvent.ACTION_UP -> {
                     v.isPressed = false
-                    mMiniDrone.setPitch(0.toByte())
-                    mMiniDrone.setFlag(0.toByte())
+                    mMiniDrone?.setPitch(0.toByte())
+                    mMiniDrone?.setFlag(0.toByte())
                 }
 
                 else -> {
@@ -249,14 +249,14 @@ class KMiniDroneActivity : AppCompatActivity() {
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
-                    mMiniDrone.setRoll((-50).toByte())
-                    mMiniDrone.setFlag(1.toByte())
+                    mMiniDrone?.setRoll((-50).toByte())
+                    mMiniDrone?.setFlag(1.toByte())
                 }
 
                 MotionEvent.ACTION_UP -> {
                     v.isPressed = false
-                    mMiniDrone.setRoll(0.toByte())
-                    mMiniDrone.setFlag(0.toByte())
+                    mMiniDrone?.setRoll(0.toByte())
+                    mMiniDrone?.setFlag(0.toByte())
                 }
 
                 else -> {
@@ -270,14 +270,14 @@ class KMiniDroneActivity : AppCompatActivity() {
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     v.isPressed = true
-                    mMiniDrone.setRoll(50.toByte())
-                    mMiniDrone.setFlag(1.toByte())
+                    mMiniDrone?.setRoll(50.toByte())
+                    mMiniDrone?.setFlag(1.toByte())
                 }
 
                 MotionEvent.ACTION_UP -> {
                     v.isPressed = false
-                    mMiniDrone.setRoll(0.toByte())
-                    mMiniDrone.setFlag(0.toByte())
+                    mMiniDrone?.setRoll(0.toByte())
+                    mMiniDrone?.setFlag(0.toByte())
                 }
 
                 else -> {
@@ -357,7 +357,7 @@ class KMiniDroneActivity : AppCompatActivity() {
                     secondaryProgress = mCurrentDownloadIndex * 100
                     progress = 0
                     setCancelable(false)
-                    setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel") { dialog, which -> mMiniDrone.cancelGetLastFlightMedias() }
+                    setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel") { dialog, which -> mMiniDrone?.cancelGetLastFlightMedias() }
                     show()
                 }
 
