@@ -28,7 +28,7 @@ import java.util.HashSet
 
 class DeviceListActivity : AppCompatActivity() {
 
-    lateinit var mDroneDiscoverer: DroneDiscoverer
+    private lateinit var mDroneDiscoverer: DroneDiscoverer
 
     private val mDronesList = ArrayList<ARDiscoveryDeviceService>()
 

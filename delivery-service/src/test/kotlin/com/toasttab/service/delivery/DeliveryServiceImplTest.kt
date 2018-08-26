@@ -1,7 +1,5 @@
 package com.toasttab.service.delivery
 
-import com.toasttab.drone.Drone
-import com.toasttab.drone.DroneController
 import com.toasttab.drone.DroneControllerImpl
 import com.toasttab.drone.TestDrone
 import com.toasttab.food.service.AvailableFood
@@ -11,7 +9,7 @@ import java.util.UUID
 internal class DeliveryServiceImplTest {
 
     @Test
-    fun `simple delivery service request`() {
+    fun `delivery service accepts requests`() {
 
 
         val droneController = DroneControllerImpl(TestDrone())

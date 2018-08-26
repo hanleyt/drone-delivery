@@ -2,14 +2,23 @@ package com.parrot.sdksample.drone
 
 import android.os.Environment
 import android.util.Log
-import com.parrot.arsdk.ardatatransfer.*
+import com.parrot.arsdk.ardatatransfer.ARDATATRANSFER_ERROR_ENUM
+import com.parrot.arsdk.ardatatransfer.ARDataTransferException
+import com.parrot.arsdk.ardatatransfer.ARDataTransferManager
+import com.parrot.arsdk.ardatatransfer.ARDataTransferMedia
+import com.parrot.arsdk.ardatatransfer.ARDataTransferMediasDownloader
+import com.parrot.arsdk.ardatatransfer.ARDataTransferMediasDownloaderCompletionListener
+import com.parrot.arsdk.ardatatransfer.ARDataTransferMediasDownloaderProgressListener
 import com.parrot.arsdk.arutils.ARUtilsManager
 import java.io.File
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.ArrayList
+import java.util.Calendar
+import java.util.GregorianCalendar
+import java.util.Locale
 
-class SDCardModule(private val mFtpList: ARUtilsManager, private val mFtpQueue: ARUtilsManager) {
+class SDCardModule(mFtpList: ARUtilsManager, mFtpQueue: ARUtilsManager) {
 
     private val mListeners: MutableList<Listener>
 
@@ -61,7 +70,7 @@ class SDCardModule(private val mFtpList: ARUtilsManager, private val mFtpQueue: 
         }
     }
 
-    private val mDLCompletionListener = ARDataTransferMediasDownloaderCompletionListener { arg, media, error ->
+    private val mDLCompletionListener = ARDataTransferMediasDownloaderCompletionListener { _, media, _ ->
         notifyDownloadComplete(media.name)
 
         // when all download are finished, stop the download runnable

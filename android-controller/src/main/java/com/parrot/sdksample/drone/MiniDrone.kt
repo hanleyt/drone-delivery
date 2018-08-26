@@ -5,18 +5,35 @@ import android.os.Handler
 import android.util.Log
 import com.parrot.arsdk.arcommands.ARCOMMANDS_MINIDRONE_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM
 import com.parrot.arsdk.arcommands.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM
-import com.parrot.arsdk.arcontroller.*
-import com.parrot.arsdk.ardiscovery.*
+import com.parrot.arsdk.arcontroller.ARCONTROLLER_DEVICE_STATE_ENUM
+import com.parrot.arsdk.arcontroller.ARCONTROLLER_DICTIONARY_KEY_ENUM
+import com.parrot.arsdk.arcontroller.ARCONTROLLER_ERROR_ENUM
+import com.parrot.arsdk.arcontroller.ARControllerCodec
+import com.parrot.arsdk.arcontroller.ARControllerDictionary
+import com.parrot.arsdk.arcontroller.ARControllerException
+import com.parrot.arsdk.arcontroller.ARDeviceController
+import com.parrot.arsdk.arcontroller.ARDeviceControllerListener
+import com.parrot.arsdk.arcontroller.ARDeviceControllerStreamListener
+import com.parrot.arsdk.arcontroller.ARFeatureCommon
+import com.parrot.arsdk.arcontroller.ARFeatureMiniDrone
+import com.parrot.arsdk.arcontroller.ARFrame
+import com.parrot.arsdk.ardiscovery.ARDISCOVERY_PRODUCT_ENUM
+import com.parrot.arsdk.ardiscovery.ARDISCOVERY_PRODUCT_FAMILY_ENUM
+import com.parrot.arsdk.ardiscovery.ARDiscoveryDevice
+import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService
+import com.parrot.arsdk.ardiscovery.ARDiscoveryException
+import com.parrot.arsdk.ardiscovery.ARDiscoveryService
 import com.parrot.arsdk.arutils.ARUTILS_DESTINATION_ENUM
 import com.parrot.arsdk.arutils.ARUTILS_FTP_TYPE_ENUM
 import com.parrot.arsdk.arutils.ARUtilsException
 import com.parrot.arsdk.arutils.ARUtilsManager
 import com.toasttab.drone.Drone
-import java.util.*
+import timber.log.Timber
+import java.util.ArrayList
 
 class MiniDrone(private val mContext: Context, private val mDeviceService: ARDiscoveryDeviceService) : Drone {
 
-    private val mListeners: MutableList<Listener>
+    private val mListeners = mutableListOf<Listener>()
 
     private lateinit var mHandler: Handler
 
@@ -26,7 +43,7 @@ class MiniDrone(private val mContext: Context, private val mDeviceService: ARDis
      * Get the current connection state
      * @return the connection state of the drone
      */
-    var connectionState: ARCONTROLLER_DEVICE_STATE_ENUM? = null
+    var connectionState: ARCONTROLLER_DEVICE_STATE_ENUM = ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_STOPPED
         private set
     /**
      * Get the current flying state
@@ -53,6 +70,39 @@ class MiniDrone(private val mContext: Context, private val mDeviceService: ARDis
         override fun onDownloadComplete(mediaName: String) {
             mHandler.post { notifyDownloadComplete(mediaName) }
         }
+    }
+
+    init {
+        // needed because some callbacks will be called on the main thread
+        mHandler = Handler(mContext.mainLooper)
+
+
+        // if the product type of the deviceService match with the types supported
+        mProductType = ARDiscoveryService.getProductFromProductID(mDeviceService.productID)
+        val family = ARDiscoveryService.getProductFamily(mProductType)
+        if (ARDISCOVERY_PRODUCT_FAMILY_ENUM.ARDISCOVERY_PRODUCT_FAMILY_MINIDRONE == family) {
+
+            val discoveryDevice = createDiscoveryDevice(mDeviceService)
+            if (discoveryDevice != null) {
+                mDeviceController = createDeviceController(discoveryDevice)
+                discoveryDevice.dispose()
+            }
+
+        } else {
+            Timber.tag(TAG).e("DeviceService type is not supported by MiniDrone")
+        }
+    }
+
+    private fun createDiscoveryDevice(service: ARDiscoveryDeviceService): ARDiscoveryDevice? {
+        var device: ARDiscoveryDevice? = null
+        try {
+            device = ARDiscoveryDevice(mContext, service)
+        } catch (e: ARDiscoveryException) {
+            Timber.tag(TAG).e(e, "Exception")
+            Timber.tag(TAG).e("Error: %s", e.error)
+        }
+
+        return device
     }
 
     private val mDeviceControllerListener = object : ARDeviceControllerListener {
@@ -192,30 +242,6 @@ class MiniDrone(private val mContext: Context, private val mDeviceService: ARDis
          * @param mediaName the name of the media
          */
         fun onDownloadComplete(mediaName: String)
-    }
-
-    init {
-        mListeners = ArrayList()
-
-        // needed because some callbacks will be called on the main thread
-        mHandler = Handler(mContext.mainLooper)
-
-        connectionState = ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_STOPPED
-
-        // if the product type of the deviceService match with the types supported
-        mProductType = ARDiscoveryService.getProductFromProductID(mDeviceService.productID)
-        val family = ARDiscoveryService.getProductFamily(mProductType)
-        if (ARDISCOVERY_PRODUCT_FAMILY_ENUM.ARDISCOVERY_PRODUCT_FAMILY_MINIDRONE == family) {
-
-            val discoveryDevice = createDiscoveryDevice(mDeviceService)
-            if (discoveryDevice != null) {
-                mDeviceController = createDeviceController(discoveryDevice)
-                discoveryDevice.dispose()
-            }
-
-        } else {
-            Log.e(TAG, "DeviceService type is not supported by MiniDrone")
-        }
     }
 
     fun dispose() {
@@ -376,18 +402,6 @@ class MiniDrone(private val mContext: Context, private val mDeviceService: ARDis
         if (mSDCardModule != null) {
             mSDCardModule!!.cancelGetFlightMedias()
         }
-    }
-
-    private fun createDiscoveryDevice(service: ARDiscoveryDeviceService): ARDiscoveryDevice? {
-        var device: ARDiscoveryDevice? = null
-        try {
-            device = ARDiscoveryDevice(mContext, service)
-        } catch (e: ARDiscoveryException) {
-            Log.e(TAG, "Exception", e)
-            Log.e(TAG, "Error: " + e.error)
-        }
-
-        return device
     }
 
     private fun createDeviceController(discoveryDevice: ARDiscoveryDevice): ARDeviceController? {
