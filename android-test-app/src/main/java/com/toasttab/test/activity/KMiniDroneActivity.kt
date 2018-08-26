@@ -103,7 +103,7 @@ class KMiniDroneActivity : AppCompatActivity() {
             }
         }
 
-        findViewById(R.id.takePictureBt).setOnClickListener { mMiniDrone?.takePicture() }
+        takePictureBt.setOnClickListener { mMiniDrone?.takePicture() }
 
         with(downloadBt) {
             isEnabled = true

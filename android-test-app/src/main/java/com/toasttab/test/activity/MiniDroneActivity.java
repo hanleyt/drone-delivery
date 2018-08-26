@@ -45,7 +45,7 @@ public class MiniDroneActivity extends AppCompatActivity {
         initIHM();
 
         Intent intent = getIntent();
-        ARDiscoveryDeviceService service = intent.getParcelableExtra(DeviceListActivity.EXTRA_DEVICE_SERVICE);
+        ARDiscoveryDeviceService service = intent.getParcelableExtra(DeviceListActivity.Companion.getEXTRA_DEVICE_SERVICE());
         mMiniDrone = new MiniDrone(this, service);
         mMiniDrone.addListener(mMiniDroneListener);
 
