@@ -192,7 +192,8 @@ class MiniDroneActivity : AppCompatActivity() {
         }
 
         testCommand.setOnClickListener {
-            DroneControllerImpl(mMiniDrone as Drone, Location(0.0,0.0))
+            val droneController = DroneControllerImpl(mMiniDrone as Drone, Location(0.0, 0.0))
+            droneController.sendToLocation(Location(5.0, 1.0))
         }
 
         findViewById(R.id.takePictureBt).setOnClickListener { mMiniDrone!!.takePicture() }
