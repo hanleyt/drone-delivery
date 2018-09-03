@@ -20,6 +20,15 @@
         android:width="150dp"/>
 
     <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Test Command"
+            android:id="@+id/testCommand"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:width="150dp" android:layout_marginTop="70dp"/>
+
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Take picture"

@@ -4,8 +4,8 @@ import android.app.ProgressDialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.MotionEvent
+import android.widget.Toast
 import com.parrot.arsdk.arcommands.ARCOMMANDS_MINIDRONE_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM
 import com.parrot.arsdk.arcommands.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM
 import com.parrot.arsdk.arcontroller.ARCONTROLLER_DEVICE_STATE_ENUM
@@ -65,7 +65,8 @@ class KMiniDroneActivity : AppCompatActivity() {
             }
 
             // if the connection to the MiniDrone fails, finish the activity
-            if (!mMiniDrone!!.connect() ) {
+            if (!mMiniDrone!!.connect()) {
+                Toast.makeText(this, "Connection to drone failed", Toast.LENGTH_LONG).show()
                 // finish() todo uncomment when working with real drone.
             }
         }
@@ -93,7 +94,7 @@ class KMiniDroneActivity : AppCompatActivity() {
     private fun initIHM() {
         Timber.d("initHM...")
 
-        findViewById(R.id.emergencyBt).setOnClickListener { mMiniDrone?.emergency() }
+        emergencyBt.setOnClickListener { mMiniDrone?.emergency() }
 
         takeOffOrLandBt.setOnClickListener {
             when (mMiniDrone?.flyingState) {
@@ -103,7 +104,7 @@ class KMiniDroneActivity : AppCompatActivity() {
             }
         }
 
-        findViewById(R.id.takePictureBt).setOnClickListener { mMiniDrone?.takePicture() }
+        takePictureBt.setOnClickListener { mMiniDrone?.takePicture() }
 
         with(downloadBt) {
             isEnabled = true
@@ -296,7 +297,7 @@ class KMiniDroneActivity : AppCompatActivity() {
         }
 
         override fun onPictureTaken(error: ARCOMMANDS_MINIDRONE_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM) {
-            Log.i(TAG, "Picture has been taken")
+            Timber.tag(TAG).i("Picture has been taken")
         }
 
         override fun configureDecoder(codec: ARControllerCodec) {
@@ -315,7 +316,7 @@ class KMiniDroneActivity : AppCompatActivity() {
 
             if (nbMedias > 0) {
                 mDownloadProgressDialog = ProgressDialog(this@KMiniDroneActivity, R.style.AppCompatAlertDialogStyle)
-                with (mDownloadProgressDialog) {
+                with(mDownloadProgressDialog) {
                     isIndeterminate = false
                     setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
                     setMessage("Downloading medias")

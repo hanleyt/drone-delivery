@@ -1,8 +1,4 @@
 package com.toasttab.drone
 
 
-interface Location {
-
-    val coordinates: Pair<Int, Int>
-
-}
+data class Location(val x: Double, val y: Double)

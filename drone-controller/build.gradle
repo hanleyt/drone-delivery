@@ -12,6 +12,8 @@ apply plugin: 'kotlin'
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
     testCompile 'junit:junit:4.12'
+    testCompile group: 'org.assertj', name: 'assertj-core', version: '3.11.0'
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 }

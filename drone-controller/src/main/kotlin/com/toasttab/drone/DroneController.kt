@@ -3,13 +3,11 @@ package com.toasttab.drone
 
 interface DroneController {
 
-    fun getCurrentLocation(): Location
+    val currentLocation: Location
 
     fun sendToLocation(location: Location)
 
-    fun onArrival(arrivalCallback: (Location) -> Unit)
+    fun onArrival(arrivalCallback: () -> Unit)
 
-    fun onError()
+    fun onError(errorHandler: (Exception) -> Unit)
 }
-
-

@@ -11,19 +11,19 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM;
-import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM;
+import com.parrot.arsdk.arcommands.ARCOMMANDS_MINIDRONE_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM;
+import com.parrot.arsdk.arcommands.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM;
 import com.parrot.arsdk.arcontroller.ARCONTROLLER_DEVICE_STATE_ENUM;
 import com.parrot.arsdk.arcontroller.ARControllerCodec;
 import com.parrot.arsdk.arcontroller.ARFrame;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
-import com.parrot.sdksample.drone.BebopDrone;
+import com.parrot.sdksample.drone.MiniDrone;
 import com.toasttab.test.R;
 import com.toasttab.test.view.H264VideoView;
 
-public class BebopActivity extends AppCompatActivity {
-    private static final String TAG = "BebopActivity";
-    private BebopDrone mBebopDrone;
+public class JavaMiniDroneActivity extends AppCompatActivity {
+    private static final String TAG = "MiniDroneActivity";
+    private MiniDrone mMiniDrone;
 
     private ProgressDialog mConnectionProgressDialog;
     private ProgressDialog mDownloadProgressDialog;
@@ -40,14 +40,14 @@ public class BebopActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_bebop);
+        setContentView(R.layout.activity_minidrone);
 
         initIHM();
 
         Intent intent = getIntent();
-        ARDiscoveryDeviceService service = intent.getParcelableExtra(DeviceListActivity.EXTRA_DEVICE_SERVICE);
-        mBebopDrone = new BebopDrone(this, service);
-        mBebopDrone.addListener(mBebopListener);
+        ARDiscoveryDeviceService service = intent.getParcelableExtra(DeviceListActivity.Companion.getEXTRA_DEVICE_SERVICE());
+        mMiniDrone = new MiniDrone(this, service);
+        mMiniDrone.addListener(mMiniDroneListener);
 
     }
 
@@ -55,8 +55,8 @@ public class BebopActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        // show a loading view while the bebop drone is connecting
-        if ((mBebopDrone != null) && !(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING.equals(mBebopDrone.getConnectionState())))
+        // show a loading view while the minidrone is connecting
+        if ((mMiniDrone != null) && !(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING.equals(mMiniDrone.getConnectionState())))
         {
             mConnectionProgressDialog = new ProgressDialog(this, R.style.AppCompatAlertDialogStyle);
             mConnectionProgressDialog.setIndeterminate(true);
@@ -64,8 +64,8 @@ public class BebopActivity extends AppCompatActivity {
             mConnectionProgressDialog.setCancelable(false);
             mConnectionProgressDialog.show();
 
-            // if the connection to the Bebop fails, finish the activity
-            if (!mBebopDrone.connect()) {
+            // if the connection to the MiniDrone fails, finish the activity
+            if (!mMiniDrone.connect()) {
                 finish();
             }
         }
@@ -73,7 +73,7 @@ public class BebopActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (mBebopDrone != null)
+        if (mMiniDrone != null)
         {
             mConnectionProgressDialog = new ProgressDialog(this, R.style.AppCompatAlertDialogStyle);
             mConnectionProgressDialog.setIndeterminate(true);
@@ -81,16 +81,18 @@ public class BebopActivity extends AppCompatActivity {
             mConnectionProgressDialog.setCancelable(false);
             mConnectionProgressDialog.show();
 
-            if (!mBebopDrone.disconnect()) {
+            if (!mMiniDrone.disconnect()) {
                 finish();
             }
+        } else {
+            finish();
         }
     }
 
     @Override
     public void onDestroy()
     {
-        mBebopDrone.dispose();
+        mMiniDrone.dispose();
         super.onDestroy();
     }
 
@@ -99,20 +101,20 @@ public class BebopActivity extends AppCompatActivity {
 
         findViewById(R.id.emergencyBt).setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                mBebopDrone.emergency();
+                mMiniDrone.emergency();
             }
         });
 
         mTakeOffLandBt = (Button) findViewById(R.id.takeOffOrLandBt);
         mTakeOffLandBt.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                switch (mBebopDrone.getFlyingState()) {
-                    case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED:
-                        mBebopDrone.takeOff();
+                switch (mMiniDrone.getFlyingState()) {
+                    case ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED:
+                        mMiniDrone.takeOff();
                         break;
-                    case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING:
-                    case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING:
-                        mBebopDrone.land();
+                    case ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING:
+                    case ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING:
+                        mMiniDrone.land();
                         break;
                     default:
                 }
@@ -121,7 +123,7 @@ public class BebopActivity extends AppCompatActivity {
 
         findViewById(R.id.takePictureBt).setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                mBebopDrone.takePicture();
+                mMiniDrone.takePicture();
             }
         });
 
@@ -129,16 +131,16 @@ public class BebopActivity extends AppCompatActivity {
         mDownloadBt.setEnabled(false);
         mDownloadBt.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                mBebopDrone.getLastFlightMedias();
+                mMiniDrone.getLastFlightMedias();
 
-                mDownloadProgressDialog = new ProgressDialog(BebopActivity.this, R.style.AppCompatAlertDialogStyle);
+                mDownloadProgressDialog = new ProgressDialog(JavaMiniDroneActivity.this, R.style.AppCompatAlertDialogStyle);
                 mDownloadProgressDialog.setIndeterminate(true);
                 mDownloadProgressDialog.setMessage("Fetching medias");
                 mDownloadProgressDialog.setCancelable(false);
                 mDownloadProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mBebopDrone.cancelGetLastFlightMedias();
+                        mMiniDrone.cancelGetLastFlightMedias();
                     }
                 });
                 mDownloadProgressDialog.show();
@@ -151,12 +153,12 @@ public class BebopActivity extends AppCompatActivity {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         v.setPressed(true);
-                        mBebopDrone.setGaz((byte) 50);
+                        mMiniDrone.setGaz((byte) 50);
                         break;
 
                     case MotionEvent.ACTION_UP:
                         v.setPressed(false);
-                        mBebopDrone.setGaz((byte) 0);
+                        mMiniDrone.setGaz((byte) 0);
                         break;
 
                     default:
@@ -174,12 +176,12 @@ public class BebopActivity extends AppCompatActivity {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         v.setPressed(true);
-                        mBebopDrone.setGaz((byte) -50);
+                        mMiniDrone.setGaz((byte) -50);
                         break;
 
                     case MotionEvent.ACTION_UP:
                         v.setPressed(false);
-                        mBebopDrone.setGaz((byte) 0);
+                        mMiniDrone.setGaz((byte) 0);
                         break;
 
                     default:
@@ -197,12 +199,12 @@ public class BebopActivity extends AppCompatActivity {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         v.setPressed(true);
-                        mBebopDrone.setYaw((byte) -50);
+                        mMiniDrone.setYaw((byte) -50);
                         break;
 
                     case MotionEvent.ACTION_UP:
                         v.setPressed(false);
-                        mBebopDrone.setYaw((byte) 0);
+                        mMiniDrone.setYaw((byte) 0);
                         break;
 
                     default:
@@ -220,12 +222,12 @@ public class BebopActivity extends AppCompatActivity {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         v.setPressed(true);
-                        mBebopDrone.setYaw((byte) 50);
+                        mMiniDrone.setYaw((byte) 50);
                         break;
 
                     case MotionEvent.ACTION_UP:
                         v.setPressed(false);
-                        mBebopDrone.setYaw((byte) 0);
+                        mMiniDrone.setYaw((byte) 0);
                         break;
 
                     default:
@@ -243,14 +245,14 @@ public class BebopActivity extends AppCompatActivity {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         v.setPressed(true);
-                        mBebopDrone.setPitch((byte) 50);
-                        mBebopDrone.setFlag((byte) 1);
+                        mMiniDrone.setPitch((byte) 50);
+                        mMiniDrone.setFlag((byte) 1);
                         break;
 
                     case MotionEvent.ACTION_UP:
                         v.setPressed(false);
-                        mBebopDrone.setPitch((byte) 0);
-                        mBebopDrone.setFlag((byte) 0);
+                        mMiniDrone.setPitch((byte) 0);
+                        mMiniDrone.setFlag((byte) 0);
                         break;
 
                     default:
@@ -268,14 +270,14 @@ public class BebopActivity extends AppCompatActivity {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         v.setPressed(true);
-                        mBebopDrone.setPitch((byte) -50);
-                        mBebopDrone.setFlag((byte) 1);
+                        mMiniDrone.setPitch((byte) -50);
+                        mMiniDrone.setFlag((byte) 1);
                         break;
 
                     case MotionEvent.ACTION_UP:
                         v.setPressed(false);
-                        mBebopDrone.setPitch((byte) 0);
-                        mBebopDrone.setFlag((byte) 0);
+                        mMiniDrone.setPitch((byte) 0);
+                        mMiniDrone.setFlag((byte) 0);
                         break;
 
                     default:
@@ -293,14 +295,14 @@ public class BebopActivity extends AppCompatActivity {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         v.setPressed(true);
-                        mBebopDrone.setRoll((byte) -50);
-                        mBebopDrone.setFlag((byte) 1);
+                        mMiniDrone.setRoll((byte) -50);
+                        mMiniDrone.setFlag((byte) 1);
                         break;
 
                     case MotionEvent.ACTION_UP:
                         v.setPressed(false);
-                        mBebopDrone.setRoll((byte) 0);
-                        mBebopDrone.setFlag((byte) 0);
+                        mMiniDrone.setRoll((byte) 0);
+                        mMiniDrone.setFlag((byte) 0);
                         break;
 
                     default:
@@ -318,14 +320,14 @@ public class BebopActivity extends AppCompatActivity {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         v.setPressed(true);
-                        mBebopDrone.setRoll((byte) 50);
-                        mBebopDrone.setFlag((byte) 1);
+                        mMiniDrone.setRoll((byte) 50);
+                        mMiniDrone.setFlag((byte) 1);
                         break;
 
                     case MotionEvent.ACTION_UP:
                         v.setPressed(false);
-                        mBebopDrone.setRoll((byte) 0);
-                        mBebopDrone.setFlag((byte) 0);
+                        mMiniDrone.setRoll((byte) 0);
+                        mMiniDrone.setFlag((byte) 0);
                         break;
 
                     default:
@@ -340,7 +342,7 @@ public class BebopActivity extends AppCompatActivity {
         mBatteryLabel = (TextView) findViewById(R.id.batteryLabel);
     }
 
-    private final BebopDrone.Listener mBebopListener = new BebopDrone.Listener() {
+    private final MiniDrone.Listener mMiniDroneListener = new MiniDrone.Listener() {
         @Override
         public void onDroneConnectionChanged(ARCONTROLLER_DEVICE_STATE_ENUM state) {
             switch (state)
@@ -366,15 +368,15 @@ public class BebopActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onPilotingStateChanged(ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM state) {
+        public void onPilotingStateChanged(ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM state) {
             switch (state) {
-                case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED:
+                case ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED:
                     mTakeOffLandBt.setText("Take off");
                     mTakeOffLandBt.setEnabled(true);
                     mDownloadBt.setEnabled(true);
                     break;
-                case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING:
-                case ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING:
+                case ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING:
+                case ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING:
                     mTakeOffLandBt.setText("Land");
                     mTakeOffLandBt.setEnabled(true);
                     mDownloadBt.setEnabled(false);
@@ -386,7 +388,7 @@ public class BebopActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onPictureTaken(ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
+        public void onPictureTaken(ARCOMMANDS_MINIDRONE_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
             Log.i(TAG, "Picture has been taken");
         }
 
@@ -408,7 +410,7 @@ public class BebopActivity extends AppCompatActivity {
             mCurrentDownloadIndex = 1;
 
             if (nbMedias > 0) {
-                mDownloadProgressDialog = new ProgressDialog(BebopActivity.this, R.style.AppCompatAlertDialogStyle);
+                mDownloadProgressDialog = new ProgressDialog(JavaMiniDroneActivity.this, R.style.AppCompatAlertDialogStyle);
                 mDownloadProgressDialog.setIndeterminate(false);
                 mDownloadProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 mDownloadProgressDialog.setMessage("Downloading medias");
@@ -419,7 +421,7 @@ public class BebopActivity extends AppCompatActivity {
                 mDownloadProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mBebopDrone.cancelGetLastFlightMedias();
+                        mMiniDrone.cancelGetLastFlightMedias();
                     }
                 });
                 mDownloadProgressDialog.show();
