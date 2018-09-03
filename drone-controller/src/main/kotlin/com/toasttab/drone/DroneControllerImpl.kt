@@ -1,20 +1,17 @@
 package com.toasttab.drone
 
-class DroneControllerImpl(val drone: Drone) : DroneController {
-
-    override fun getCurrentLocation(): Location {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+class DroneControllerImpl(val drone: Drone, override val currentLocation: Location) : DroneController {
 
     override fun sendToLocation(location: Location) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onArrival(arrivalCallback: (Location) -> Unit) {
+    override fun onArrival(arrivalCallback: () -> Unit) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onError() {
+    override fun onError(errorHandler: (Exception) -> Unit) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
 }

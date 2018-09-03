@@ -27,6 +27,7 @@ import com.parrot.arsdk.arutils.ARUTILS_DESTINATION_ENUM
 import com.parrot.arsdk.arutils.ARUTILS_FTP_TYPE_ENUM
 import com.parrot.arsdk.arutils.ARUtilsException
 import com.parrot.arsdk.arutils.ARUtilsManager
+import com.parrot.sdksample.discovery.DroneDiscoverer
 import com.toasttab.drone.Drone
 import timber.log.Timber
 import java.util.ArrayList
@@ -105,62 +106,66 @@ class MiniDrone(private val mContext: Context, private val mDeviceService: ARDis
         return device
     }
 
-    private val mDeviceControllerListener = object : ARDeviceControllerListener {
-        override fun onStateChanged(deviceController: ARDeviceController, newState: ARCONTROLLER_DEVICE_STATE_ENUM, error: ARCONTROLLER_ERROR_ENUM) {
-            connectionState = newState
-            if (ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING == connectionState) {
-                mDeviceController!!.startVideoStream()
-            } else if (ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_STOPPED == connectionState) {
-                if (mSDCardModule != null) {
-                    mSDCardModule!!.cancelGetFlightMedias()
-                }
-                if (mFtpListManager != null) {
-                    mFtpListManager!!.closeFtp(mContext, mDeviceService)
-                    mFtpListManager = null
-                }
-                if (mFtpQueueManager != null) {
-                    mFtpQueueManager!!.closeFtp(mContext, mDeviceService)
-                    mFtpQueueManager = null
-                }
-            }
-            mHandler.post { notifyConnectionChanged(connectionState) }
-        }
+    private var mDeviceControllerListener = newDeviceControllerListener()
 
-        override fun onExtensionStateChanged(deviceController: ARDeviceController, newState: ARCONTROLLER_DEVICE_STATE_ENUM, product: ARDISCOVERY_PRODUCT_ENUM, name: String, error: ARCONTROLLER_ERROR_ENUM) {}
-
-        override fun onCommandReceived(deviceController: ARDeviceController, commandKey: ARCONTROLLER_DICTIONARY_KEY_ENUM, elementDictionary: ARControllerDictionary?) {
-            // if event received is the battery update
-            if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_COMMON_COMMONSTATE_BATTERYSTATECHANGED && elementDictionary != null) {
-                val args = elementDictionary[ARControllerDictionary.ARCONTROLLER_DICTIONARY_SINGLE_KEY]
-                if (args != null) {
-                    val battery = args[ARFeatureCommon.ARCONTROLLER_DICTIONARY_KEY_COMMON_COMMONSTATE_BATTERYSTATECHANGED_PERCENT] as Int
-                    mHandler.post { notifyBatteryChanged(battery) }
-                }
-            } else if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED && elementDictionary != null) {
-                val args = elementDictionary[ARControllerDictionary.ARCONTROLLER_DICTIONARY_SINGLE_KEY]
-                if (args != null) {
-                    val state = ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.getFromValue(args[ARFeatureMiniDrone.ARCONTROLLER_DICTIONARY_KEY_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE] as Int)
-
-                    mHandler.post {
-                        flyingState = state
-                        notifyPilotingStateChanged(state)
+    fun newDeviceControllerListener(): ARDeviceControllerListener {
+        return object : ARDeviceControllerListener {
+            override fun onStateChanged(deviceController: ARDeviceController, newState: ARCONTROLLER_DEVICE_STATE_ENUM, error: ARCONTROLLER_ERROR_ENUM) {
+                connectionState = newState
+                if (ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING == connectionState) {
+                    mDeviceController!!.startVideoStream()
+                } else if (ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_STOPPED == connectionState) {
+                    if (mSDCardModule != null) {
+                        mSDCardModule!!.cancelGetFlightMedias()
+                    }
+                    if (mFtpListManager != null) {
+                        mFtpListManager!!.closeFtp(mContext, mDeviceService)
+                        mFtpListManager = null
+                    }
+                    if (mFtpQueueManager != null) {
+                        mFtpQueueManager!!.closeFtp(mContext, mDeviceService)
+                        mFtpQueueManager = null
                     }
                 }
-            } else if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_MINIDRONE_MEDIARECORDEVENT_PICTUREEVENTCHANGED && elementDictionary != null) {
-                val args = elementDictionary[ARControllerDictionary.ARCONTROLLER_DICTIONARY_SINGLE_KEY]
-                if (args != null) {
-                    val error = ARCOMMANDS_MINIDRONE_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM.getFromValue(args[ARFeatureMiniDrone.ARCONTROLLER_DICTIONARY_KEY_MINIDRONE_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR] as Int)
-                    mHandler.post { notifyPictureTaken(error) }
-                }
-            } else if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_COMMON_RUNSTATE_RUNIDCHANGED && elementDictionary != null) {
-                val args = elementDictionary[ARControllerDictionary.ARCONTROLLER_DICTIONARY_SINGLE_KEY]
-                if (args != null) {
-                    val runID = args[ARFeatureCommon.ARCONTROLLER_DICTIONARY_KEY_COMMON_RUNSTATE_RUNIDCHANGED_RUNID] as String
-                    mHandler.post { mCurrentRunId = runID }
-                }
-            }// if event received is the run id
-            // if event received is the picture notification
-            // if event received is the flying state update
+                mHandler.post { notifyConnectionChanged(connectionState) }
+            }
+
+            override fun onExtensionStateChanged(deviceController: ARDeviceController, newState: ARCONTROLLER_DEVICE_STATE_ENUM, product: ARDISCOVERY_PRODUCT_ENUM, name: String, error: ARCONTROLLER_ERROR_ENUM) {}
+
+            override fun onCommandReceived(deviceController: ARDeviceController, commandKey: ARCONTROLLER_DICTIONARY_KEY_ENUM, elementDictionary: ARControllerDictionary?) {
+                // if event received is the battery update
+                if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_COMMON_COMMONSTATE_BATTERYSTATECHANGED && elementDictionary != null) {
+                    val args = elementDictionary[ARControllerDictionary.ARCONTROLLER_DICTIONARY_SINGLE_KEY]
+                    if (args != null) {
+                        val battery = args[ARFeatureCommon.ARCONTROLLER_DICTIONARY_KEY_COMMON_COMMONSTATE_BATTERYSTATECHANGED_PERCENT] as Int
+                        mHandler.post { notifyBatteryChanged(battery) }
+                    }
+                } else if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED && elementDictionary != null) {
+                    val args = elementDictionary[ARControllerDictionary.ARCONTROLLER_DICTIONARY_SINGLE_KEY]
+                    if (args != null) {
+                        val state = ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.getFromValue(args[ARFeatureMiniDrone.ARCONTROLLER_DICTIONARY_KEY_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE] as Int)
+
+                        mHandler.post {
+                            flyingState = state
+                            notifyPilotingStateChanged(state)
+                        }
+                    }
+                } else if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_MINIDRONE_MEDIARECORDEVENT_PICTUREEVENTCHANGED && elementDictionary != null) {
+                    val args = elementDictionary[ARControllerDictionary.ARCONTROLLER_DICTIONARY_SINGLE_KEY]
+                    if (args != null) {
+                        val error = ARCOMMANDS_MINIDRONE_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM.getFromValue(args[ARFeatureMiniDrone.ARCONTROLLER_DICTIONARY_KEY_MINIDRONE_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR] as Int)
+                        mHandler.post { notifyPictureTaken(error) }
+                    }
+                } else if (commandKey == ARCONTROLLER_DICTIONARY_KEY_ENUM.ARCONTROLLER_DICTIONARY_KEY_COMMON_RUNSTATE_RUNIDCHANGED && elementDictionary != null) {
+                    val args = elementDictionary[ARControllerDictionary.ARCONTROLLER_DICTIONARY_SINGLE_KEY]
+                    if (args != null) {
+                        val runID = args[ARFeatureCommon.ARCONTROLLER_DICTIONARY_KEY_COMMON_RUNSTATE_RUNIDCHANGED_RUNID] as String
+                        mHandler.post { mCurrentRunId = runID }
+                    }
+                }// if event received is the run id
+                // if event received is the picture notification
+                // if event received is the flying state update
+            }
         }
     }
 
@@ -408,6 +413,9 @@ class MiniDrone(private val mContext: Context, private val mDeviceService: ARDis
         var deviceController: ARDeviceController? = null
         try {
             deviceController = ARDeviceController(discoveryDevice)
+            if(mDeviceControllerListener == null){
+                mDeviceControllerListener = newDeviceControllerListener()
+            }
 
             deviceController.addListener(mDeviceControllerListener)
             deviceController.addStreamListener(mStreamListener)

@@ -18,8 +18,12 @@ import com.parrot.arsdk.arcontroller.ARControllerCodec
 import com.parrot.arsdk.arcontroller.ARFrame
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService
 import com.parrot.sdksample.drone.MiniDrone
+import com.toasttab.drone.Drone
+import com.toasttab.drone.DroneControllerImpl
+import com.toasttab.drone.Location
 import com.toasttab.test.R
 import com.toasttab.test.view.H264VideoView
+import kotlinx.android.synthetic.main.activity_minidrone.*
 
 class MiniDroneActivity : AppCompatActivity() {
     private var mMiniDrone: MiniDrone? = null
@@ -185,6 +189,10 @@ class MiniDroneActivity : AppCompatActivity() {
                 ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED -> mMiniDrone!!.takeOff()
                 ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING, ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_MINIDRONE_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING -> mMiniDrone!!.land()
             }
+        }
+
+        testCommand.setOnClickListener {
+            DroneControllerImpl(mMiniDrone as Drone, Location(0.0,0.0))
         }
 
         findViewById(R.id.takePictureBt).setOnClickListener { mMiniDrone!!.takePicture() }

@@ -55,7 +55,7 @@ class DeviceListActivity : AppCompatActivity() {
             return 0
         }
 
-        override fun getView(position: Int, convertView: View, parent: ViewGroup): View {
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             var rowView: View? = convertView
             // reuse views
             if (rowView == null) {
@@ -80,7 +80,7 @@ class DeviceListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // TODO Conor: For automatically launching KMiniDroneActivity for test purposes, remove when ready.
-        Handler().postDelayed({ startActivity(Intent(this@DeviceListActivity, KMiniDroneActivity::class.java)) }, 500)
+//        Handler().postDelayed({ startActivity(Intent(this@DeviceListActivity, MiniDroneActivity::class.java)) }, 500)
 
         setContentView(R.layout.activity_device_list)
         val listView = findViewById(R.id.list) as ListView
