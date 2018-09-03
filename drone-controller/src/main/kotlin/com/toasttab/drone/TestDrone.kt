@@ -1,21 +1,30 @@
 package com.toasttab.drone
 
+import java.util.Date
+import kotlin.concurrent.timer
+
 
 class TestDrone : Drone {
 
     var flyingState = Drone.FlyingState.STOPPED
-    var currentLocation = Pair(0, 0)
 
     override fun takeOff() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        flyingState = Drone.FlyingState.FLYING
     }
 
     override fun land() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        flyingState = Drone.FlyingState.STOPPED
     }
 
+    private var xLocation : Double = 0.0
+
+    private val pitchFactor: Double = 1.0
+
     override fun setPitch(pitch: Byte) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        if(pitch == 0.toByte()){
+            val timer = timer("pitch tracker", true, Date(), 100) { xLocation += pitch * pitchFactor }
+            timer.cancel()
+        }
     }
 
     override fun setRoll(roll: Byte) {
@@ -30,8 +39,10 @@ class TestDrone : Drone {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    private var flag: Byte = 0
+
     override fun setFlag(flag: Byte) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+     this.flag = flag
     }
 
 }
