@@ -184,7 +184,7 @@ class MiniDrone(private val mContext: Context, private val mDeviceService: ARDis
          * Called in the main thread
          * @param state the state of the drone
          */
-        fun onDroneConnectionChanged(state: ARCONTROLLER_DEVICE_STATE_ENUM?)
+        fun onDroneConnectionChanged(state: ARCONTROLLER_DEVICE_STATE_ENUM)
 
         /**
          * Called when the battery charge changes
@@ -419,7 +419,7 @@ class MiniDrone(private val mContext: Context, private val mDeviceService: ARDis
     }
 
     //region notify listener block
-    private fun notifyConnectionChanged(state: ARCONTROLLER_DEVICE_STATE_ENUM?) {
+    private fun notifyConnectionChanged(state: ARCONTROLLER_DEVICE_STATE_ENUM) {
         val listenersCpy = ArrayList(mListeners)
         for (listener in listenersCpy) {
             listener.onDroneConnectionChanged(state)

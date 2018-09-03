@@ -259,7 +259,7 @@ class KMiniDroneActivity : AppCompatActivity() {
 
 
     private val mMiniDroneListener = object : MiniDrone.Listener {
-        override fun onDroneConnectionChanged(state: ARCONTROLLER_DEVICE_STATE_ENUM?) {
+        override fun onDroneConnectionChanged(state: ARCONTROLLER_DEVICE_STATE_ENUM) {
             when (state) {
                 ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING -> mConnectionProgressDialog.dismiss()
 

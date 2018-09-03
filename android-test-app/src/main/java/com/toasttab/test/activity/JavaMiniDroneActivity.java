@@ -21,7 +21,7 @@ import com.parrot.sdksample.drone.MiniDrone;
 import com.toasttab.test.R;
 import com.toasttab.test.view.H264VideoView;
 
-public class MiniDroneActivity extends AppCompatActivity {
+public class JavaMiniDroneActivity extends AppCompatActivity {
     private static final String TAG = "MiniDroneActivity";
     private MiniDrone mMiniDrone;
 
@@ -133,7 +133,7 @@ public class MiniDroneActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mMiniDrone.getLastFlightMedias();
 
-                mDownloadProgressDialog = new ProgressDialog(MiniDroneActivity.this, R.style.AppCompatAlertDialogStyle);
+                mDownloadProgressDialog = new ProgressDialog(JavaMiniDroneActivity.this, R.style.AppCompatAlertDialogStyle);
                 mDownloadProgressDialog.setIndeterminate(true);
                 mDownloadProgressDialog.setMessage("Fetching medias");
                 mDownloadProgressDialog.setCancelable(false);
@@ -410,7 +410,7 @@ public class MiniDroneActivity extends AppCompatActivity {
             mCurrentDownloadIndex = 1;
 
             if (nbMedias > 0) {
-                mDownloadProgressDialog = new ProgressDialog(MiniDroneActivity.this, R.style.AppCompatAlertDialogStyle);
+                mDownloadProgressDialog = new ProgressDialog(JavaMiniDroneActivity.this, R.style.AppCompatAlertDialogStyle);
                 mDownloadProgressDialog.setIndeterminate(false);
                 mDownloadProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 mDownloadProgressDialog.setMessage("Downloading medias");
