@@ -1,7 +1,6 @@
 buildscript {
     ext.kotlin_version = '1.2.70'
     ext.ktor_version = '0.9.4'
-//    ext.exposed_version = '0.9.1'
     repositories {
         mavenCentral()
     }
@@ -42,10 +41,6 @@ dependencies {
     compile "io.ktor:ktor-server-test-host:$ktor_version"
     compile "io.ktor:ktor-locations:$ktor_version"
     compile "io.ktor:ktor-gson:$ktor_version"
-//    compile "org.jetbrains.exposed:exposed:$exposed_version"
-//    compile "mysql:mysql-connector-java:5.1.6"
-//    compile "com.h2database:h2:1.4.196"
-
 
     testCompile 'junit:junit:4.12'
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"

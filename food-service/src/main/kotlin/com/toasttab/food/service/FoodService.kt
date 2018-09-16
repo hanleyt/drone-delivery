@@ -1,28 +1,31 @@
 package com.toasttab.food.service
 
-interface FoodService {
-    suspend fun getAvailableFood(): List<AvailableFood>
-    suspend fun getFoodDetails(name:String): AvailableFood
+import kotlinx.coroutines.experimental.delay
 
-    fun advertiseFood(availableFood: AvailableFood)
-    fun withdrawFood(availableFood: AvailableFood)
+interface FoodService {
+    suspend fun getFoodNames(): List<String>
+    suspend fun getFoodDetails(name:String): AvailableFood?
 }
 
-//internal class FoodServiceImpl : FoodService {
-//    override suspend fun getFoodDetails(): AvailableFood {
-//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-//    }
-//
-//    override suspend fun getAvailableFood(): List<AvailableFood> {
-//        TODO("return currently available food")
-//    }
-//
-//    override fun withdrawFood(availableFood: AvailableFood) {
-//        TODO("not implemented")
-//    }
-//
-//    override fun advertiseFood(availableFood: AvailableFood) {
-//        TODO("not implemented")
-//    }
-//
-//}
+object DummyFoodService : FoodService {
+    override suspend fun getFoodNames(): List<String> {
+        delay(5000)
+        return listOf(
+                "Food1",
+                "Food2",
+                "Food3",
+                "Food4"
+        )
+    }
+
+    override suspend fun getFoodDetails(name: String): AvailableFood? {
+        delay(5000)
+        return when (name) {
+            "Food1" -> AvailableFood("Food1", "Summary1")
+            "Food2" -> AvailableFood("Food2", "Summary2")
+            "Food3" -> AvailableFood("Food3", "Summary3")
+            "Food4" -> AvailableFood("Food4", "Summary4")
+            else -> null
+        }
+    }
+}
