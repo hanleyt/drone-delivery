@@ -1,5 +1,7 @@
 package com.toasttab.drone
 
+import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 
@@ -14,31 +16,28 @@ class DroneControllerImpl(
     private var arrivalCallback: (() -> Unit)? = null
     private var errorHandler: ((Exception) -> Unit)? = null
 
-    override fun sendToLocation(location: Location) {
-        launch(onCompletion = {arrivalCallback?.invoke()}) {
-            try {
-                drone.takeOff()
+    override fun sendToLocation(location: Location): Deferred<Location> {
+        return async(onCompletion = { arrivalCallback?.invoke() }) {
+            drone.takeOff()
 
-                drone.setPitch(50)
-                drone.setFlag(1)
-                delay((location.x * pitchFactor).toInt())
-                drone.setPitch(0)
-                drone.setFlag(0)
+            drone.setPitch(50)
+            drone.setFlag(1)
+            delay((location.x * pitchFactor).toInt())
+            drone.setPitch(0)
+            drone.setFlag(0)
 
-                currentLocation = currentLocation.copy(x = location.x)
+            currentLocation = currentLocation.copy(x = location.x)
 
-                drone.setRoll(50)
-                drone.setFlag(1)
-                delay((location.y * rollFactor).toInt())
-                drone.setRoll(0)
-                drone.setFlag(0)
+            drone.setRoll(50)
+            drone.setFlag(1)
+            delay((location.y * rollFactor).toInt())
+            drone.setRoll(0)
+            drone.setFlag(0)
 
-                currentLocation = currentLocation.copy(y = location.y)
+            currentLocation = currentLocation.copy(y = location.y)
 
-                drone.land()
-            } catch (e: Exception) {
-                errorHandler?.invoke(e)
-            }
+            drone.land()
+            currentLocation
         }
     }
 

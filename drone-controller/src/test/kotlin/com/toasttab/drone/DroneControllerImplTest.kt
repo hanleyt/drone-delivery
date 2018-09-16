@@ -1,5 +1,6 @@
 package com.toasttab.drone
 
+import kotlinx.coroutines.experimental.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -25,7 +26,10 @@ class DroneControllerImplTest {
         droneController.onArrival { countDownLatch.countDown() }
 
 
-        droneController.sendToLocation(Location(5.0, 1.0))
+        runBlocking {
+            val newLocation = droneController.sendToLocation(Location(5.0, 1.0))
+            newLocation.await()
+        }
 
         countDownLatch.await()
 
